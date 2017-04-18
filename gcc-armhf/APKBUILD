@@ -1,0 +1,69 @@
+# Maintainer: Oliver Smith <ollieparanoid@bitmessage.ch>
+# WORKAROUND: This package is a drop-in replacement for the currently
+# broken gcc-armhf, that bootstrap.sh should be able to build:
+# https://bugs.alpinelinux.org/issues/7085
+
+_target_alpine=armhf
+_target="$(arch_to_hostspec $_target_alpine)"
+
+pkgname=gcc-${_target_alpine}
+pkgver=6.3.0
+pkgrel=1
+pkgdesc="The GNU compiler collection (built with musl-cross-make)"
+url="https://gcc.gnu.org/"
+arch="all"
+license="BSD GPL GPL2 GPL2+ GPL3+ LGPL LGPL2 LGPL3 MIT"
+depends=""
+makedepends="musl-cross-make"
+options="!check !strip"
+
+_BINUTILS_VER=2.27
+_GCC_VER=6.3.0
+_GMP_VER=6.1.1
+_MPC_VER=1.0.3
+_MPFR_VER=3.1.4
+_MUSL_VER=1.1.16
+_LINUX_VER=4.4.10
+
+source="
+	https://ftp.gnu.org/pub/gnu/binutils/binutils-${_BINUTILS_VER}.tar.bz2
+	https://ftp.gnu.org/pub/gnu/gcc/gcc-${_GCC_VER}/gcc-${_GCC_VER}.tar.bz2
+	https://ftp.gnu.org/pub/gnu/gmp/gmp-${_GMP_VER}.tar.bz2
+	https://ftp.gnu.org/pub/gnu/mpc/mpc-${_MPC_VER}.tar.gz
+	https://ftp.gnu.org/pub/gnu/mpfr/mpfr-${_MPFR_VER}.tar.bz2
+	https://www.musl-libc.org/releases/musl-${_MUSL_VER}.tar.gz
+	https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-${_LINUX_VER}.tar.xz
+"
+
+build() {
+	cd "$srcdir"
+	cp -r /usr/share/musl-cross-make/* $srcdir/ || return 1
+	{
+		echo "TARGET=$_target"
+		echo "SOURCES=$srcdir"
+		echo "OUTPUT=/usr/lib/gcc/${_target_alpine}/$pkgver/"
+	} > config.mak || return 1
+	make
+}
+
+package() {
+	cd "$srcdir"
+	make DESTDIR="$pkgdir" install || return 1
+
+	# create symlinks
+	mkdir -p "$pkgdir/usr/bin"
+	cd "$pkgdir/usr/lib/gcc/${_target_alpine}/$pkgver/bin"
+	for i in ${_target}*; do
+		renamed="${i/${_target}/${_target_alpine}}"
+		ln -v -s /usr/lib/gcc/${_target_alpine}/$pkgver/bin/$i \
+			$pkgdir/usr/bin/$renamed
+	done
+}
+
+sha512sums="cf276f84935312361a2ca077e04d0b469d23a3aed979d8ba5d92ea590904ffb2c2e7ed12cc842822bfc402836be86f479660cef3791aa62f3753d8a1a6f564cb  binutils-2.27.tar.bz2
+234dd9b1bdc9a9c6e352216a7ef4ccadc6c07f156006a59759c5e0e6a69f0abcdc14630eff11e3826dd6ba5933a8faa43043f3d1d62df6bd5ab1e82862f9bf78  gcc-6.3.0.tar.bz2
+0a2a2407c1efcb50a0c05f0bfcee06507ac96c889489c20402fb78ed2dc408577e555bac39ec84af5ac4ecdb92bb245f1bbf438165330e0c21d8a50c3a5fec8c  gmp-6.1.1.tar.bz2
+0028b76df130720c1fad7de937a0d041224806ce5ef76589f19c7b49d956071a683e2f20d154c192a231e69756b19e48208f2889b0c13950ceb7b3cfaf059a43  mpc-1.0.3.tar.gz
+51066066ff2c12ed2198605ecf68846b0c96b548adafa5b80e0c786d0df488411a5e8973358fce7192dc977ad4e68414cf14500e3c39746de62465eb145bb819  mpfr-3.1.4.tar.bz2
+47c00e50b7605102fb4aebe1f9ba9db94d26fac64805f6d744c9c557a05b8a58dff7f9558ff7c8d66b5d7c43740cdc2dd79448bacac47f1414e6ada99c210140  musl-1.1.16.tar.gz
+3689f87b89c780d9577f73496292f68b2d85a6d19024819149b3944fb041e41701603c4b5091047d33d2abfa264312ed5b6836b5094523acaca0db98cd91d560  linux-4.4.10.tar.xz"
