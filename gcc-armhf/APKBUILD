@@ -3,6 +3,9 @@
 # broken gcc-armhf, that bootstrap.sh should be able to build:
 # https://bugs.alpinelinux.org/issues/7085
 
+# WARNING: This package is a Work in Progress. Turns out, the binaries
+# compiled with this cross-compiler segfault in some cases!
+
 _target_alpine=armhf
 _target="$(arch_to_hostspec $_target_alpine)"
 
