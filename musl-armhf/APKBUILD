@@ -1,0 +1,47 @@
+# Maintainer: Oliver Smith <ollieparanoid@bitmessage.ch>
+pkgname=musl-armhf
+pkgver=1.1.16
+pkgrel=8
+pkgdesc="the musl c library (libc) implementation"
+arch=all
+url="https://www.musl-libc.org/"
+license="MIT"
+options="!check !strip"
+subpackages="musl-dev-armhf:package_dev"
+
+_target="$(arch_to_hostspec armhf)"
+_mirror="https://nl.alpinelinux.org/alpine"
+_pkgname="musl"
+_branch="edge"
+source="
+	$_mirror/$_branch/main/armhf/$_pkgname-$pkgver-r$pkgrel.apk
+	$_mirror/$_branch/main/armhf/$_pkgname-dev-$pkgver-r$pkgrel.apk
+"
+
+package() {
+	mkdir -p "$pkgdir/usr/$_target"
+	cd "$pkgdir/usr/$_target" || return 1
+	tar -xf $srcdir/$_pkgname-$pkgver-r$pkgrel.apk || return 1
+	rm .PKGINFO .SIGN.* || return 1
+}
+package_dev() {
+	mkdir -p "$subpkgdir/usr/$_target"
+	cd "$subpkgdir/usr/$_target" || return 1
+	tar -xf $srcdir/$_pkgname-dev-$pkgver-r$pkgrel.apk || return 1
+	rm .PKGINFO .SIGN.* || return 1
+
+	# symlink everything from /usr/$_target/usr/* to /usr/$_target/*
+	# so armhf-gcc does not fail to build.
+	for _dir in include lib; do
+		mkdir -p "$subpkgdir/usr/$_target/$_dir" || return 1
+		cd "$subpkgdir/usr/$_target/usr/$_dir"
+		for i in *; do
+			cd "$subpkgdir/usr/$_target/$_dir"
+			ln -s /usr/$_target/usr/$_dir/$i $i || return 1
+		done
+	done
+}
+
+
+sha512sums="0e6e55b24b87a93babb6df4020605e844cacc60a092c464c8f16782c186c9a0a513c33a4aa5bb9186980642179e24ccb3f6bb3140ba59da223687afc096b4af7  musl-1.1.16-r8.apk
+ebc5001204ee5ebb91095ba458739b4f8ada3c183af329f9f2ab067235f6e4bbf7a1c8d4a7f6a55a5a6e12d9e667ff817fef25f2546dec94183436859b40da39  musl-dev-1.1.16-r8.apk"
