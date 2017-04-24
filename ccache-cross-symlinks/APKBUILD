@@ -1,5 +1,4 @@
 # Maintainer: Oliver Smith <ollieparanoid@bitmessage.ch>
-# NOTE: This could probably be upstreamed to the official ccache aport.
 
 pkgname=ccache-cross-symlinks
 pkgver=1
