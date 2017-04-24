@@ -2,6 +2,7 @@
 # NOTE: Fails to build without "make -j1"!
 # Based on binutils-avr aport, with the following changes:
 # - replaced avr with armhf
+# - added bison to makedepends
 # - added --with-sysroot option
 # - removed manpage installation
 pkgname=binutils-armhf
