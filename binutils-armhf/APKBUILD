@@ -1,5 +1,4 @@
 # Maintainer: Oliver Smith <ollieparanoid@bitmessage.ch>
-# NOTE: Fails to build without "make -j1"!
 # Based on binutils-avr aport, with the following changes:
 # - replaced avr with armhf
 # - added bison to makedepends
@@ -37,7 +36,7 @@ build() {
 		--disable-werror \
 		--disable-nls \
 		|| return 1
-	make -j1
+	make
 }
 
 package() {
