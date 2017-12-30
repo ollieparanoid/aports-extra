@@ -1,0 +1,22 @@
+pkgname=dtbtool-lineage
+pkgver=0.0_git20160805
+pkgrel=0
+_commit="d1dacc6c79481f2f1e720a2cb14401a3593c4e26"
+pkgdesc="works with old kernels, has problems with newer kernels (mainline)"
+url="https://github.com/LineageOS/android_device_qcom_common/tree/cm-14.1/dtbtool"
+arch="all"
+license="MIT"
+source="dtbtool-lineage.c::https://raw.githubusercontent.com/LineageOS/android_device_qcom_common/$_commit/dtbtool/dtbtool.c Makefile"
+options="!check"
+
+build() {
+	cd "$srcdir"
+	make
+}
+
+package() {
+	install -D -m755 "$srcdir"/dtbTool-lineage \
+		"$pkgdir"/usr/bin/dtbTool-lineage
+}
+sha512sums="a98b24b962be0f11c037bdf420db57621249ba52d666b162b897fe02d06bd65969e4c260d5b2e01e2f851c9649d6e19d8584126b7ea6e5070424f41d383de1a7  dtbtool-lineage.c
+eea87b2f3c3c6954e95d14bdf4c84bd50d8a59920b6fc7167eac0d70daad7281b0b7f769ebd7a2511b4a02d34eb7fe49610a27f383136e5420713995035ae271  Makefile"
